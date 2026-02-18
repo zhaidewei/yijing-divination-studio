@@ -98,6 +98,8 @@ const els = {
   resultPanel: document.getElementById("resultPanel"),
   hexagramSummary: document.getElementById("hexagramSummary"),
   flowLog: document.getElementById("flowLog"),
+  copyResultBtn: document.getElementById("copyResultBtn"),
+  copyResultStatus: document.getElementById("copyResultStatus"),
   apiKey: document.getElementById("apiKey"),
   model: document.getElementById("model"),
   aiBtn: document.getElementById("aiBtn"),
@@ -222,6 +224,7 @@ function updateButtons() {
   els.castBtn.disabled = !questionOk || entropyCollecting;
   els.focusCastBtn.disabled = !(entropyCollecting && entropyOk);
   els.aiBtn.disabled = !currentResult;
+  els.copyResultBtn.disabled = !currentResult;
 }
 
 function splitIntoTwo(total, rng) {
@@ -415,6 +418,69 @@ function renderSummary(result) {
 
   els.flowLog.textContent = result.flowText;
   els.resultPanel.hidden = false;
+}
+
+function buildCastResultText(result) {
+  const movingText = result.movingLines.length > 0 ? result.movingLines.join(IS_EN ? ", " : "、") : IS_EN ? "No moving lines" : "无动爻";
+  const linesText = [...result.lines]
+    .reverse()
+    .map((line, i) => `${YAO_LABELS[5 - i]}${IS_EN ? ": " : "："}${renderYao(line)} (value=${line.value})`)
+    .join("\n");
+  const upperName = IS_EN ? result.base.upperTrig.enName : result.base.upperTrig.name;
+  const lowerName = IS_EN ? result.base.lowerTrig.enName : result.base.lowerTrig.name;
+  const changedUpper = IS_EN ? result.changed.upperTrig.enName : result.changed.upperTrig.name;
+  const changedLower = IS_EN ? result.changed.lowerTrig.enName : result.changed.lowerTrig.name;
+
+  if (IS_EN) {
+    return [
+      "I Ching Casting Result",
+      "",
+      `Question: ${result.question}`,
+      `Primary hexagram: #${result.base.no} ${result.base.name} (upper ${upperName}, lower ${lowerName})`,
+      `Changed hexagram: #${result.changed.no} ${result.changed.name} (upper ${changedUpper}, lower ${changedLower})`,
+      `Moving lines: ${movingText}`,
+      "",
+      "Six lines (top to bottom):",
+      linesText,
+    ].join("\n");
+  }
+
+  return [
+    "周易起卦结果",
+    "",
+    `问题：${result.question}`,
+    `本卦：第${result.base.no}卦 ${result.base.name}（上${upperName} 下${lowerName}）`,
+    `变卦：第${result.changed.no}卦 ${result.changed.name}（上${changedUpper} 下${changedLower}）`,
+    `动爻：${movingText}`,
+    "",
+    "六爻（自上而下）：",
+    linesText,
+  ].join("\n");
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.setAttribute("readonly", "");
+  ta.style.position = "fixed";
+  ta.style.left = "-9999px";
+  document.body.appendChild(ta);
+  ta.select();
+  const ok = document.execCommand("copy");
+  document.body.removeChild(ta);
+  if (!ok) {
+    throw new Error(IS_EN ? "Clipboard copy is not supported in this browser." : "当前浏览器不支持复制到剪贴板。");
+  }
+}
+
+function setCopyResultStatus(message, isError = false) {
+  els.copyResultStatus.textContent = message;
+  els.copyResultStatus.style.color = isError ? "#8f2e21" : "";
 }
 
 function getAiPendingText() {
@@ -700,6 +766,7 @@ function openHistoryAt(index) {
   if (!hydrated) return;
   currentResult = hydrated;
   renderSummary(currentResult);
+  setCopyResultStatus("");
   els.interpretPanel.hidden = false;
   els.interpretText.textContent = getAiPendingText();
   updateButtons();
@@ -738,6 +805,7 @@ function wireActions() {
       currentResult = buildResult(question);
       entropyCompleted = true;
       renderSummary(currentResult);
+      setCopyResultStatus("");
       pushHistory(currentResult);
       els.interpretPanel.hidden = false;
       els.interpretText.textContent = getAiPendingText();
@@ -785,6 +853,17 @@ function wireActions() {
     const index = Number(btn.getAttribute("data-history-index"));
     if (Number.isNaN(index)) return;
     openHistoryAt(index);
+  });
+
+  els.copyResultBtn.addEventListener("click", async () => {
+    if (!currentResult) return;
+    const text = buildCastResultText(currentResult);
+    try {
+      await copyTextToClipboard(text);
+      setCopyResultStatus(IS_EN ? "Cast result copied." : "卦象结果已复制。");
+    } catch (err) {
+      setCopyResultStatus(IS_EN ? `Copy failed: ${err.message}` : `复制失败：${err.message}`, true);
+    }
   });
 }
 
