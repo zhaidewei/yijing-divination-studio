@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>I Ching Casting</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>I Ching Casting</h1>
+        <p class="subtitle">Generate six lines with the traditional yarrow-stalk method, then interpret the primary and changed hexagrams.</p>
+        <p class="muted">About the I Ching: <a href="https://en.wikipedia.org/wiki/I_Ching" target="_blank" rel="noopener noreferrer">Wikipedia - I Ching</a></p>
+        <p class="muted"><a href="index.html">中文</a> | <strong>English</strong></p>
+      </header>
+
+      <section class="panel">
+        <label for="question">Your Question</label>
+        <textarea id="question" rows="3" placeholder="Example: Is it a good time to switch jobs in the next three months?"></textarea>
+        <div class="question-guide">
+          <p><strong>How to ask a better question</strong></p>
+          <ol>
+            <li>Add a time range, such as "next 3 months".</li>
+            <li>Focus on one decision at a time.</li>
+            <li>State clear options (A vs B).</li>
+            <li>Name your criteria: upside, risk, relationships, growth, etc.</li>
+          </ol>
+          <p class="muted">Example: In the next 3 months, should I prioritize joining a new team or staying for promotion in my current team?</p>
+        </div>
+
+        <div class="entropy-row">
+          <div>
+            <div class="entropy-title">Behavior Entropy Collection (Focus Phase)</div>
+            <div id="entropyText" class="entropy-text">Entropy is collected only while the "Read & Cast" modal is open.</div>
+          </div>
+          <div class="entropy-bar-wrap" aria-hidden="true">
+            <div id="entropyBar" class="entropy-bar"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="castBtn" disabled>Enter Read & Cast</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <details>
+          <summary>I Ching Casting Rules (Click to Expand)</summary>
+          <div class="rules-text">
+            <p>This site uses the traditional yarrow-stalk method. Core rules:</p>
+            <ol>
+              <li>Each line starts with 49 stalks.</li>
+              <li>Each line performs three transformations: split, take one, count by fours.</li>
+              <li>After each step, remove by remainders (0 counts as 4). Three steps produce 6/7/8/9.</li>
+              <li>6 = old yin (moving), 7 = young yang, 8 = young yin, 9 = old yang (moving).</li>
+              <li>Six lines from bottom to top form the primary hexagram; moving lines invert to form the changed hexagram.</li>
+              <li>The Strict Process panel shows detailed steps for each of the three transformations per line.</li>
+            </ol>
+            <p><strong>Glossary</strong></p>
+            <ul>
+              <li><strong>Hexagram:</strong> a six-line figure.</li>
+              <li><strong>Line:</strong> one line in a hexagram; yin is broken, yang is solid.</li>
+              <li><strong>Moving line:</strong> a changing line (6 or 9).</li>
+              <li><strong>Primary hexagram:</strong> the initial state.</li>
+              <li><strong>Changed hexagram:</strong> the transformed trend after moving lines invert.</li>
+              <li><strong>Upper/Lower trigram:</strong> top three lines and bottom three lines.</li>
+              <li><strong>Three transformations:</strong> repeat split/take/count three times per line.</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <section class="panel">
+        <h2>AI Interpretation Settings</h2>
+        <label for="apiKey">Anthropic API Key (optional, kept in browser memory only)</label>
+        <input id="apiKey" type="password" placeholder="sk-ant-..." autocomplete="off" />
+        <label for="model">Model (optional)</label>
+        <input id="model" type="text" value="claude-sonnet-4-20250514" />
+        <button id="aiBtn" class="secondary" disabled>AI Interpretation</button>
+      </section>
+
+      <section class="panel" id="resultPanel" hidden>
+        <h2>Casting Result</h2>
+        <div id="hexagramSummary"></div>
+        <details>
+          <summary>View Strict Process (Three Transformations per Line)</summary>
+          <pre id="flowLog"></pre>
+        </details>
+      </section>
+
+      <section class="panel" id="interpretPanel" hidden>
+        <h2>AI Interpretation</h2>
+        <div id="interpretText"></div>
+      </section>
+
+      <section class="panel" id="historyPanel">
+        <h2>Recent Casts</h2>
+        <div id="historyList" class="history-list"></div>
+      </section>
+    </main>
+
+    <div id="focusOverlay" class="focus-overlay" hidden>
+      <section class="focus-card">
+        <h2>Read the Question and Collect Entropy</h2>
+        <p class="muted">Silently read your question once. During this phase, move/click/type naturally. Then click "Finish Reading & Cast".</p>
+        <div id="focusQuestion" class="focus-question"></div>
+
+        <div class="entropy-row">
+          <div id="focusEntropyText" class="entropy-text">Collecting...</div>
+          <div class="entropy-bar-wrap" aria-hidden="true">
+            <div id="focusEntropyBar" class="entropy-bar"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="focusCastBtn" disabled>Finish Reading & Cast</button>
+          <button id="focusCancelBtn" class="secondary">Cancel</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>

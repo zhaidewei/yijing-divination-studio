@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>周易起卦</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>周易起卦</h1>
+        <p class="subtitle">使用大衍筮法（蓍草法）生成六爻，本卦与变卦后再进行解读。</p>
+        <p class="muted">易经介绍：<a href="https://zh.wikipedia.org/wiki/%E6%98%93%E7%BB%8F" target="_blank" rel="noopener noreferrer">维基百科《易经》</a></p>
+        <p class="muted"><strong>中文</strong> | <a href="index.en.html">English</a></p>
+      </header>
+
+      <section class="panel">
+        <label for="question">你的问题</label>
+        <textarea
+          id="question"
+          rows="3"
+          placeholder="例如：我在未来三个月是否适合换工作？"
+        ></textarea>
+        <div class="question-guide">
+          <p><strong>怎么问出好问题</strong></p>
+          <ol>
+            <li>加上时间范围：如“未来 3 个月”“今年内”。</li>
+            <li>聚焦一个决策：避免同一问题里混入多个目标。</li>
+            <li>写清选项：如“去 A 公司还是留在现岗位”。</li>
+            <li>明确你关心的维度：如收益、风险、关系、学习成长。</li>
+          </ol>
+          <p class="muted">示例：未来三个月，我该优先“跳槽到新团队”还是“留在原团队争取晋升”？</p>
+        </div>
+
+        <div class="entropy-row">
+          <div>
+            <div class="entropy-title">行为随机数采集（默读阶段）</div>
+            <div id="entropyText" class="entropy-text">行为熵只在“默读问题并起卦”弹层开启期间采集。</div>
+          </div>
+          <div class="entropy-bar-wrap" aria-hidden="true">
+            <div id="entropyBar" class="entropy-bar"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="castBtn" disabled>进入默读并起卦</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <details>
+          <summary>周易起卦规则说明（点击展开）</summary>
+          <div class="rules-text">
+            <p>本网站使用大衍筮法（蓍草法）起卦，核心规则如下：</p>
+            <ol>
+              <li>每一爻从 49 策开始计算。</li>
+              <li>每爻执行三变：分二、挂一、揲四。</li>
+              <li>每变后按余数去策（余数为 0 时按 4 计），三变后得到 6/7/8/9。</li>
+              <li>6 为老阴（动爻），7 为少阳，8 为少阴，9 为老阳（动爻）。</li>
+              <li>六爻自下而上组成“本卦”；动爻阴阳反转后得到“变卦”。</li>
+              <li>页面中的“严格流程”会展示每一爻三变的详细过程。</li>
+            </ol>
+            <p><strong>术语速览</strong></p>
+            <ul>
+              <li><strong>卦：</strong>由六爻组成的整体卦象。</li>
+              <li><strong>爻：</strong>卦中的一条线，阴爻为“— —”，阳爻为“———”。</li>
+              <li><strong>动爻：</strong>会变化的爻，老阴（6）或老阳（9）。</li>
+              <li><strong>本卦：</strong>起卦后先得到的卦，反映当前局势。</li>
+              <li><strong>变卦：</strong>将动爻阴阳反转后得到的卦，反映趋势变化。</li>
+              <li><strong>上卦 / 下卦：</strong>六爻分成上三爻与下三爻，对应两个三爻卦。</li>
+              <li><strong>三变：</strong>每一爻要重复三次“分二、挂一、揲四”的计算过程。</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <section class="panel">
+        <h2>AI解卦设置</h2>
+        <label for="apiKey">Anthropic API Key（可选，仅保存在浏览器内存）</label>
+        <input id="apiKey" type="password" placeholder="sk-ant-..." autocomplete="off" />
+        <label for="model">模型（可选）</label>
+        <input id="model" type="text" value="claude-sonnet-4-20250514" />
+        <button id="aiBtn" class="secondary" disabled>AI解卦</button>
+      </section>
+
+      <section class="panel" id="resultPanel" hidden>
+        <h2>起卦结果</h2>
+        <div id="hexagramSummary"></div>
+        <details>
+          <summary>查看严格流程（每爻三变）</summary>
+          <pre id="flowLog"></pre>
+        </details>
+      </section>
+
+      <section class="panel" id="interpretPanel" hidden>
+        <h2>AI解卦</h2>
+        <div id="interpretText"></div>
+      </section>
+
+      <section class="panel" id="historyPanel">
+        <h2>最近起卦记录</h2>
+        <div id="historyList" class="history-list"></div>
+      </section>
+    </main>
+
+    <div id="focusOverlay" class="focus-overlay" hidden>
+      <section class="focus-card">
+        <h2>默读问题并采集行为熵</h2>
+        <p class="muted">请默读以下问题一遍，在这段时间自然移动、点击或按键。完成后点击“完成默读，开始起卦”。</p>
+        <div id="focusQuestion" class="focus-question"></div>
+
+        <div class="entropy-row">
+          <div id="focusEntropyText" class="entropy-text">采集中...</div>
+          <div class="entropy-bar-wrap" aria-hidden="true">
+            <div id="focusEntropyBar" class="entropy-bar"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="focusCastBtn" disabled>完成默读，开始起卦</button>
+          <button id="focusCancelBtn" class="secondary">取消</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
