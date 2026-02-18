@@ -35,6 +35,16 @@ python3 -m http.server 8080
 5. 熵条满后点击“完成默读，开始起卦”。
 6. 可选：填写 Anthropic API Key，点击“AI解卦”。
 
+## Vercel 部署
+
+本仓库已包含 `vercel.json`，可直接部署为静态站点：
+
+1. 将仓库导入 Vercel（Framework Preset 选 `Other` 即可）。
+2. Build Command 留空，Output Directory 留空。
+3. 部署后路由：
+   - `/` 或 `/zh`：中文版
+   - `/en`：英文版
+
 ## 严格流程说明
 
 本项目使用《周易》常用的 **蓍草大衍法**：
